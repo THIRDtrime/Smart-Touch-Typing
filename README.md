@@ -1,1 +1,1 @@
-# Smat-Touch-Typing
+# Smart-Touch-Typing
