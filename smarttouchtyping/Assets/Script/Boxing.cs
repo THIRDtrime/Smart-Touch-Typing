@@ -6,8 +6,10 @@ using UnityEngine.UI;
 
 public class Boxing : MonoBehaviour
 {
-    [Header("Words from file")]
-    public string[] Words;
+    [Header("Words List")]
+    public string[] Words4;
+    public string[] Words6;
+    public string[] Words8;
 
     [Header("Timer Default Value")]
     public float Turn_default;
@@ -17,8 +19,6 @@ public class Boxing : MonoBehaviour
     private float turn_count;
     bool start_count;
     bool start_effect;
-    private string player_ans;
-    private string enemy_ans;
 
     [Header("Slider")]
     public Slider player_hp_bar;
@@ -29,15 +29,14 @@ public class Boxing : MonoBehaviour
     public int enemy_hp_int;
 
     [Header("Text")]
-    public TextMeshProUGUI block_word;
-    public TextMeshProUGUI atk_word;
+    public TextMeshProUGUI l_atk_word;
+    public TextMeshProUGUI n_atk_word;
+    public TextMeshProUGUI h_atk_word;
     public TextMeshProUGUI enemy_taken_dmg;
     public TextMeshProUGUI player_taken_dmg;
     public TextMeshProUGUI timer;
     public TextMeshProUGUI Enemy_HP;
     public TextMeshProUGUI Player_HP;
-    public TextMeshProUGUI Enemy_usage;
-    public TextMeshProUGUI player_usage;
     public TextMeshProUGUI enemy_skill;
     public TextMeshProUGUI player_skill;
     public TextMeshProUGUI result;
@@ -53,11 +52,28 @@ public class Boxing : MonoBehaviour
     [Header("Files")]
     public string path = "Assets/500.txt";
 
+    [Header("GameObject")]
+    public GameObject Enemy_Character;
+    public GameObject Player_Character;
+    public GameObject Text_l;
+    public GameObject Text_n;
+    public GameObject Text_h;
+
+    private Animator player_anim;
+    private Animator enemy_anim;
+
+    [Header("Audio")]
+    public AudioClip Bell_Once;
+    public AudioClip Bell_End;
+    public AudioClip Crowd;
+    public AudioClip Hit;
 
     // Start is called before the first frame update
     void Start()
     {
         Read500();
+        enemy_anim = Enemy_Character.GetComponent<Animator>();
+        player_anim = Player_Character.GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -69,10 +85,29 @@ public class Boxing : MonoBehaviour
         player_hp_bar.value = player_hp_int;
         enemy_hp_bar.value = enemy_hp_int;
 
-        
+        if (player_hp_int <= 0)
+        {
+            result.text = "Defeated";
+            player_anim.SetBool("Defeat",true);
+            enemy_anim.SetBool("Victory", true);
+        }
+        if (enemy_hp_int <= 0)
+        {
+            result.text = "Victory!";
+            enemy_anim.SetBool("Defeat",true);
+            player_anim.SetBool("Victory", true);
+        }
 
         if (start_count)
         {
+            input_field.gameObject.SetActive(true);
+            Text_l.SetActive(true);
+            Text_n.SetActive(true);
+            Text_h.SetActive(true);
+            l_atk_word.gameObject.SetActive(true);
+            n_atk_word.gameObject.SetActive(true);
+            h_atk_word.gameObject.SetActive(true);
+
             turn_count -= Time.deltaTime;
             input_field.ActivateInputField();
         }
@@ -80,12 +115,6 @@ public class Boxing : MonoBehaviour
         {
             effect_count -= Time.deltaTime;
             input_field.DeactivateInputField();
-        }
-
-        if (Input.GetKey(KeyCode.PageUp))
-        {
-            RandomWord();
-            start_count = true;
         }
 
         if (input_field.text != "" && Input.GetKey(KeyCode.Return))
@@ -102,11 +131,7 @@ public class Boxing : MonoBehaviour
             player_taken_dmg.text = "";
             start_effect = false;
             effect_count = Effect_default;
-            player_ans = "";
-            enemy_ans = "";
             result.text = "";
-            player_usage.text = "";
-            Enemy_usage.text = "";
             enemy_skill.text = "";
             player_skill.text = "";
         }
@@ -118,42 +143,65 @@ public class Boxing : MonoBehaviour
 
     public void EvalANS()
     {
-        if (input_field.text == block_word.text.Remove(block_word.text.Length - 1))
+        if (input_field.text == l_atk_word.text.Remove(l_atk_word.text.Length - 1))
         {
-            block_word.color = Green;
-            print("Block");
-            player_usage.text = input_field.text;
+            l_atk_word.color = Green;
             start_count = false;
             start_effect = true;
-            player_ans = "b";
+            enemy_hp_int -= 4;
+            player_anim.SetTrigger("Punch");
+
+            input_field.gameObject.SetActive(false);
+            Text_l.SetActive(true);
+            Text_n.SetActive(false);
+            Text_h.SetActive(false);
+            l_atk_word.gameObject.SetActive(true);
+            n_atk_word.gameObject.SetActive(false);
+            h_atk_word.gameObject.SetActive(false);
 
         }
-        else if (input_field.text == atk_word.text.Remove(atk_word.text.Length - 1))
+        else if (input_field.text == n_atk_word.text.Remove(n_atk_word.text.Length - 1))
         {
-            atk_word.color = Green;
-            print("Attack");
-            player_usage.text = input_field.text;
+            n_atk_word.color = Green;
+            enemy_hp_int -= 6;
             start_count = false;
             start_effect = true;
-            player_ans = "a";
+            player_anim.SetTrigger("Punch");
+
+            input_field.gameObject.SetActive(false);
+            Text_l.SetActive(false);
+            Text_n.SetActive(true);
+            Text_h.SetActive(false);
+            l_atk_word.gameObject.SetActive(false);
+            n_atk_word.gameObject.SetActive(true);
+            h_atk_word.gameObject.SetActive(false);
         }
-        /*else if (input_field.text == cta_word.text.Remove(cta_word.text.Length - 1))
+        else if (input_field.text == h_atk_word.text.Remove(h_atk_word.text.Length - 1))
         {
-            cta_word.color = new Color(0, 255, 0);
-            print("Counter_attack");
+            h_atk_word.color = Green;
+            enemy_hp_int -= 8;
             start_count = false;
             start_effect = true;
-            player_ans = "d";
-        }*/
+            player_anim.SetTrigger("Punch");
+
+            input_field.gameObject.SetActive(false);
+            Text_l.SetActive(false);
+            Text_n.SetActive(false);
+            Text_h.SetActive(true);
+            l_atk_word.gameObject.SetActive(false);
+            n_atk_word.gameObject.SetActive(false);
+            h_atk_word.gameObject.SetActive(true);
+        }
         else
         {
-            block_word.color = Red;
-            atk_word.color = Red;
+            l_atk_word.color = Red;
+            n_atk_word.color = Red;
+            h_atk_word.color = Red;
 
             Punish();
         }
 
-        string enemy_word = Words[Random.Range(0, Words.Length)];
+        /*string enemy_word = Words[Random.Range(0, Words.Length)];
         int enemy_word_count = enemy_word.Length -1;
 
         Enemy_usage.text = char.ToUpper(enemy_word[0]) + enemy_word.Substring(1);
@@ -161,7 +209,7 @@ public class Boxing : MonoBehaviour
         System.Random rand = new System.Random();
         enemy_ans = new string(Enumerable.Repeat("ab", 1).Select(s => s[rand.Next(s.Length)]).ToArray());
 
-        if (player_ans == enemy_ans) // Both Atk
+       if (player_ans == enemy_ans) // Both Atk
         {
             result.text = "Traded!!";
             Punish();
@@ -185,17 +233,14 @@ public class Boxing : MonoBehaviour
         }
         switch (enemy_ans)
         {
-            case "a": enemy_skill.text = "Attack"; break;
-            case "b": enemy_skill.text = "Block"; break;
+            case "a": enemy_skill.text = "Attack"; enemy_anim.SetTrigger("Punch"); break;
+            case "b": enemy_skill.text = "Block"; player_anim.SetTrigger("Block"); break;
                 //case "d": enemy_skill.text = "Dodge"; break;
         }
+        */
         input_field.text = "";
     }
 
-
-    /// <summary>
-    /// Deals Damage to player with random word with chance of Idle
-    /// </summary>
     public void Punish()
     {
 
@@ -204,48 +249,48 @@ public class Boxing : MonoBehaviour
 
         turn_count = Turn_default;
 
-        int randword = Random.Range(0, Words.Length);
-
-        int randIdle = Random.Range(0, 100);
-
-
-        if (randIdle <= 60)
-        {
-            Enemy_usage.text = char.ToUpper(Words[randword][0]) + Words[randword].Substring(1);
-
-            player_hp_int -= Words[randword].Remove(Words[randword].Length - 1).Length;
-        }
-        else
-        {
-            Enemy_usage.text = "(Missed)";
-        }
+        player_hp_int -= 5;
 
 
         input_field.text = "";
     }
     void Read500()
     {
-        StreamReader reader = new StreamReader(path);
-
-        Words = reader.ReadToEnd().Split('\n');
-
-        reader.Close();
+        string[] paths = { "Assets/Text4.txt", "Assets/Text6.txt", "Assets/Text8.txt" };
+        foreach (var path in paths)
+        {
+            StreamReader reader = new StreamReader(path);
+            if (path.Contains("4"))
+            {
+                Words4 = reader.ReadToEnd().Split('\n');
+            }
+            else if (path.Contains("6"))
+            {
+                Words6 = reader.ReadToEnd().Split('\n');
+            }
+            else if (path.Contains("8"))
+            {
+                Words8 = reader.ReadToEnd().Split('\n');
+            }
+            reader.Close();
+        }
     }
 
     public void RandomWord()
     {
         int i, j, k;
-        i = Random.Range(0, Words.Length);
-        j = Random.Range(0, Words.Length);
-        k = Random.Range(0, Words.Length);
+        i = Random.Range(0, Words4.Length);
+        j = Random.Range(0, Words6.Length);
+        k = Random.Range(0, Words8.Length);
 
-        atk_word.text = char.ToUpper(Words[i][0]) + Words[i].Substring(1);
-        block_word.text = char.ToUpper(Words[j][0]) + Words[j].Substring(1);
+        h_atk_word.text = char.ToUpper(Words8[i][0]) + Words8[i].Substring(1);
+        n_atk_word.text = char.ToUpper(Words6[i][0]) + Words6[i].Substring(1);
+        l_atk_word.text = char.ToUpper(Words4[j][0]) + Words4[j].Substring(1);
         //cta_word.text = char.ToUpper(Words[k][0]) + Words[k].Substring(1);
 
-        atk_word.color = new Color(255, 255, 255);
-        block_word.color = new Color(255, 255, 255);
-        //cta_word.color = new Color(255, 255, 255);
+        h_atk_word.color = new Color(255, 255, 255);
+        l_atk_word.color = new Color(255, 255, 255);
+        n_atk_word.color = new Color(255, 255, 255);
 
         start_count = true;
         turn_count = Turn_default;
