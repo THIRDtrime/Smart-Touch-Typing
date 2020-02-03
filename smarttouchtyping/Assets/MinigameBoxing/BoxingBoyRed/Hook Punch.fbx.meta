@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: 381452e98a92cdd41bbfbc0532716e9d
+guid: 4ba254b0284f4fd4da68be83db9f7ee9
 ModelImporter:
   serializedVersion: 26
   internalIDToNameTable:
   - first:
       74: -203655887218126122
-    second: Normal Attack
+    second: HeavyAttack
   externalObjects: {}
   materials:
     importMaterials: 1
@@ -35,11 +35,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Normal Attack
+      name: HeavyAttack
       takeName: mixamo.com
-      internalID: -203655887218126122
+      internalID: 0
       firstFrame: 0
-      lastFrame: 67
+      lastFrame: 65
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
